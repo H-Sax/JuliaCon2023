@@ -1,0 +1,941 @@
+---
+title: "CirculatorySystemModels.jl"
+subtitle: "A fresh approach to 0D models"
+author: "Dr. Torsten Schenkel, Harry Saxton"
+institute: "Department of Engineering and Mathematics, Materials and Engineering Research Institut (MERI), Sheffield Hallam University"
+
+execute:
+  keep-ipynb: false
+format: 
+  revealjs:
+    template-partials:
+      - ./style/title-slide.html
+    margin: 0.05 
+    # needed for chalkboard replay to work
+    # if we set the margin too large, the whiteboard replay will have an offset!
+    # this also will make it work better on mobile displays, less wasted screen space
+    max-scale: 5.0
+    # max-scale increased for 4k displays!
+    center: true
+    navigation-mode: linear
+    auto-play-media: true
+    # chalkboard:
+    #   chalk-width: 2
+    #   chalk-effect: 0.0
+#      src: 01-Introduction_files/chalkboard.json
+#    audio:
+#      prefix: './01-Introduction_files/audio/'
+#      autoplay: false
+    # footer: "0D cardiovascular Modelling"
+    theme: default
+    logo: ./style/shu.svg
+    css: ./style/shu_reveal.css
+    code-fold: show
+    freeze: auto
+    scrollable: false
+    slide-number: c/t
+    preview-links: true
+    controls: true
+    controls-tutorial: true
+    reference-location: document
+    embed-resources: true 
+    highlight-style: github
+    
+#  pdf:
+#    cap-location: margin
+#    reference-location: margin
+
+#  html:
+#    toc: true
+#    html-math-method: katex
+
+bibliography: /home/thor/library.bib
+---
+
+# Where did we come from?
+
+::::{.columns}
+:::{.column}
+Windkessel BCs for 3D-Haemodynamics
+<!-- Source: file:///home/thor/Documents/Research/Publications/NVBF/Latex/images/ivabradineWSS.png, accessed: Sun Jul 16 14:05:01 2023 -->
+![](./images/images_for_CSM_Presentation.qmd/ivabradineWSS.png)
+:::
+
+:::{.column}
+Inverse Problem
+
+Parameter Identifiability for full circulatory system models
+ 
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+
+:::
+::::
+
+## (enter Julia) {.scrollable}
+
+
+::: {.panel-tabset}
+
+### Problem
+
+:::{.columns}
+
+:::{.column}
+![4-Element Windkessel](./images/images_for_CSM_Presentation.qmd/wk4.drawio.png)
+:::
+
+:::{.column}
+$$
+\frac{d p_{1}}{d t} = - \frac{R_{c}}{L_{p}} p_{1} \\ + \left( \frac{R_{c}}{L_{p}} - \frac{1}{R_{p} C} \right) p_{2} \\ + R_{c} \frac{d I(t)}{d t} + \frac{I(t)}{C}
+$$
+
+$$
+\frac{d p_{2}}{d t} = - \frac{1}{R_{p} C} p_{2} + \frac{I(t)}{C}
+$$
+:::
+
+:::
+     
+### Python
+
+
+```python
+import scipy as sp
+from scipy.misc import derivative
+
+def wk4(t, y, I, Rc, Rp, C, Lp, dt):
+
+    dp1dt = (
+        -Rc / Lp * y[0]
+        + (Rc / Lp - 1 / Rp / C) * y[1]
+        + Rc * ddt(I, t, dt)
+        + I(t) / C
+    )
+
+    dp2dt = -1 / Rp / C * y[1] + I(t) / C
+
+    return [dp1dt, dp2dt]
+
+def ddt(fun, t, dt):
+    # Central differencing method
+    return (fun(t + dt) - fun(t - dt)) / (2 * dt)
+
+%time sol = sp.integrate.solve_ivp(
+        lambda t, y: wk4(t, y, I, Rc, Rp, C, Lp, dt),
+        (time_start, time_end),
+        initial_cond,
+        method="RK45",
+        rtol=1e-9,
+        vectorized=True,
+    )
+
+: CPU times: user 961 ms, sys: 5.47 ms, total: 967 ms
+: Wall time: 967 ms
+```
+
+### MATLAB
+
+```matlab
+function dP = RHS_defn(t,P,Rc,Rp,C,Lp)
+
+dP    = zeros(2,1);
+
+dP(1) = -Rc / Lp * P(1) ...
+        + (Rc / Lp - 1 / Rp / C) * P(2) ...
+        + Rc * didt(t) + i(t) / C;
+
+dP(2) = -1 / Rp / C * P(2) + i(t) / C;
+
+end
+
+function didt = didt(t)
+dt = 1e-3;
+didt = (i(t+dt) - i(t-dt)) / (2 * dt);
+end
+
+options        = odeset('Reltol',1e-9);
+
+tic
+[t, P] = ode45(@(t,P) RHS_defn(t,P,Rc,Rp,C,Ls,Lp), tspan, P0, options);
+toc
+
+Elapsed time is 0.129001 seconds.
+```
+
+
+### Julia
+
+```julia
+function wk4(dP, P, params, t)
+
+    Rc, Rp, C, Lp = params
+
+    dP[1] = (
+        -Rc / Lp * P[1]
+        + (Rc / Lp - 1 / Rp / C) * P[2]
+        + Rc * derivative(I, t)
+        + I(t) / C
+        )
+
+    dP[2] = -1 / Rp / C * P[2] + I(t) / C
+
+    return dP[1], dP[2]
+
+end
+
+prob = ODEProblem(wk4, P0, tspan, params)
+
+@btime sol = solve(prob, Tsit5(), reltol=1e-9, abstol=1e-9)
+
+:   3.710 ms (214986 allocations: 3.45 MiB)
+```
+:::
+ 
+## Deriving all equations by hand?
+
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![A simple full circulatory system model [@doi:10.1080/03091902.2019.1576792]  ](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+  
+  
+  
+
+## Composable models - Acausal modelling
+
+<!-- Source: file:///home/thor/Documents/Research/SaxtonPhD/0D-ModellingInJulia_files/images/causalVSacausal.png, accessed: Wed Jul 19 12:06:54 2023 -->
+![Causal vs Acausal - Slide from Openmodelica presentation](./images/images_for_CSM_Presentation.qmd/causalVSacausal.png)
+
+## CirculatorySystemModels.jl{.smaller}
+
+
+:::{.columns}
+
+:::{.column}
+`CirculatorySystemModels.jl` (Schenkel et al.) is a composable modelling framework for cardiovascular circulation models using `ModelingToolkit.jl`.
+
+It allows the straighforward generation of CVS models from a component library and automates the creation of ODE or ODAE systems for arbitrary flow networks.
+:::
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/SaxtonPhD/0D-ModellingInJulia_files/images/mermaidDiagramAlpha.png, accessed: Wed Jul 19 12:17:59 2023 -->
+<!-- ![](./images/images_for_CSM_Presentation.qmd/mermaidDiagramAlpha.png) -->
+```{mermaid}
+%%{init: {'theme': 'base', 'themeVariables': { 'clusterBkg': '#ddd'}}}%%
+flowchart
+
+  A[Network] --> C(Connections)
+  B[Components] --> D(Component Equations)
+  
+  C --> E[System Equations]
+  D --> E
+  E --> |Structural Simplify| G[ODEProblem]
+  G --> H[ODESolver]
+```
+:::
+:::
+## Demonstration{.smaller}
+
+::: {.panel-tabset}
+
+### Connections
+
+:::{.columns}
+
+:::{.column}
+
+![4-Element Windkessel](./images/images_for_CSM_Presentation.qmd/wk4.drawio.png)
+
+:::
+
+:::{.column}
+
+```julia
+@named source = DrivenFlow(fun=sineDicrotic)
+@named Rc = Resistor(R=Rc)
+@named Lp = Inductance(L=Lp)
+@named Rp = Resistor(R=Rp)
+@named C  = Capacitor(C=C)
+@named ground = Ground()
+
+circ_eqs = [
+  connect(source.out, Rc.in, Lp.in)
+  connect(Rc.out, Lp.out, Rp.in, C.in)
+  connect(Rp.out, C.out, ground.g, source.in)
+]
+```
+
+`3-element Vector{Equation}`
+
+:::
+
+:::
+
+### ODE System
+
+**Combine connection equations (Kirchhoff laws) with component equations:
+**
+
+```julia
+@named _circ_model = ODESystem(circ_eqs, t)
+@named circ_model = compose(_circ_model,
+                          [source, Rc, Lp, Ls, Rp, C, ground]);
+```
+
+`
+Model circ_model with 21 (32) equations, States (32), Parameters (7)
+`
+
+Outcome: complete system of all ODEs and algebraic relations defined by connections and components.
+
+**Simplify ODAE system:
+**
+```julia
+circ_sys = structural_simplify(circ_model)
+```
+
+`
+Model circ_model with 2 equations, States (2), Parameters (7), 
+`
+
+Outcome: system of minimal number of ODE (states), while all observables are still included (via algebraic relations).
+
+### Solving
+
+:::{.columns}
+:::{.column}
+```julia
+u0 = [0,0]
+tspan = (0, 30)
+
+prob = ODEProblem(circ_sys, u0, tspan)
+
+@btime sol = solve(prob, Tsit5(), reltol=1e-9);
+```
+
+`
+1.782 ms (14581 allocations: 1.23 MiB)
+`
+
+_Another 2x speed-up compared to the hand-derived ODEs! MTK optimises ODEs for efficiency and stability. In this case ODEs are not for $p_{1}$ and $p_{2}$, but for $Q_{L_p}$ and $\Delta p_C$._
+
+:::
+:::{.column}
+```julia
+plot(sol, idxs=[Rc.in.p, C.in.p], tspan=(29,30),
+     xlabel="time [s]", ylabel="p [Torr]")  
+```
+
+![](./0D-ModellingInJulia_files/images/5wk_plot.png)
+:::
+
+:::
+
+
+
+
+
+### Under the hood 
+
+```julia
+@connector function Pin(; name)
+    sts = @variables p(t) = 1.0 q(t) = 1.0 [connect = Flow]
+    ODESystem(Equation[], t, sts, []; name = name)
+end
+
+
+function Ground(;name, P=0.0)
+    @named g = Pin()
+    ps = @parameters P = P
+    eqs = [g.p ~ P]
+    compose(ODESystem(eqs, t, [], ps; name=name), g)
+end
+
+
+function OnePort(;name)
+    @named in = Pin()
+    @named out = Pin()
+    sts = @variables Δp(t) = 0.0 q(t) = 0.0
+    eqs = [
+           Δp ~ out.p - in.p
+           0 ~ in.q + out.q
+           q ~ in.q
+          ]
+    compose(ODESystem(eqs, t, sts, []; name=name), in, out)
+end
+
+
+function Resistor(;name, R=1.0)
+    @named oneport = OnePort()
+    @unpack Δp, q = oneport
+    ps = @parameters R = R
+    eqs = [
+           Δp ~ - q * R
+          ]
+    extend(ODESystem(eqs, t, [], ps; name=name), oneport)
+end
+
+
+function Capacitor(;name, C=1.0)
+    @named oneport = OnePort()
+    @unpack Δp, q = oneport
+    ps = @parameters C = C
+    D = Differential(t)
+    eqs = [
+           D(Δp) ~ - q / C
+          ]
+    extend(ODESystem(eqs, t, [], ps; name=name), oneport)
+end
+
+
+function Inductance(;name, L=1.0)
+    @named oneport = OnePort()
+    @unpack Δp, q = oneport
+    ps = @parameters L = L
+    D = Differential(t)
+    eqs = [
+           D(q) ~ - Δp / L
+          ]
+    extend(ODESystem(eqs, t, [], ps; name=name), oneport)
+end
+
+function DrivenFlow(;name, Q=1.0, τ=1.0, fun)
+    @named oneport = OnePort()
+    @unpack q = oneport
+    ps = @parameters Q = Q τ = τ
+    eqs = [
+           q ~  Q * fun(t / τ)
+          ]
+    extend(ODESystem(eqs, t, [], ps; name=name), oneport)
+end
+```
+
+
+:::
+
+## CirculatorySystemModels.jl{.smaller}
+
+:::{.columns}
+:::{.column}
+- has a wide range of predefined components:
+
+  - Resistor, Capacitor, Inductance
+  - Compliance, Elastance (vessel models)
+  - Ventricle and Atrium models (Double-Hill, Shi)
+  - Valve models (Heaviside, Square-Root-Law, Shi Valve, ...)
+  - Compound models for vessels and vessel systems (CR, CRL, RCR, ...)
+- is easily extensible with both empirical and mechanistic component models
+- is integrated in [ModelingToolkit.jl](https://mtk.sciml.ai) and [SciML](https://sciml.ai/)
+- is validated against hand-derived ODE models and CellML
+:::
+
+:::{.column}
+<!-- <iframe width=500 height=600 data-src="https://github.com/TS-CUBED/CirculatorySystemModels.jl"></iframe> -->
+
+<!-- Source: file:///home/thor/Pictures/Screenshots/github_screenshot_CSM.png, accessed: Wed Jul 19 12:27:32 2023 -->
+![https://github.com/TS-CUBED/CirculatorySystemModels.jl](./images/images_for_CSM_Presentation.qmd/github_screenshot_CSM.png)
+:::
+
+:::
+
+
+## Example: Shi 4-chamber model{.smaller}
+
+:::{.columns}
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![A simple full circulatory system model [@doi:10.1080/03091902.2019.1576792]  ](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+:::{.fragment }
+:::{.redBox}
+**Performance** (compared to Matlab and Python code exported from CellML model - simple Diode valves^[CellML does not support complex valve types.]:
+
+| **Solver** | Matlab (ode15s) | Python (vode) | Julia (Vern7) |
+|:----------:|:---------------:|:-------------:|:-------------:|
+|            | 6.1 s           | 57.4 s        | 0.17 s        |
+:::
+:::
+
+:::
+:::{.column}
+```julia
+## 4 Chambers
+@named LV = ShiChamber(V₀=v0_lv, p₀ = p0_lv, Eₘᵢₙ=Emin_lv, Eₘₐₓ=Emax_lv, τ=τ, τₑₛ=τes_lv, τₑₚ=τed_lv, Eshift=0.0)
+@named LA = ShiChamber(V₀=v0_la, p₀ = p0_la, Eₘᵢₙ=Emin_la, Eₘₐₓ=Emax_la, τ=τ, τₑₛ=τpww_la/2, τₑₚ=τpww_la, Eshift=τpwb_la)
+@named RV = ShiChamber(V₀=v0_rv, p₀ = p0_rv, Eₘᵢₙ=Emin_rv, Eₘₐₓ=Emax_rv, τ=τ, τₑₛ=τes_rv, τₑₚ=τed_rv, Eshift=0.0)
+@named RA = ShiChamber(V₀=v0_ra, p₀ = p0_ra, Eₘᵢₙ=Emin_ra, Eₘₐₓ=Emax_ra, τ=τ, τₑₛ=τpww_ra/2, τₑₚ =τpww_ra, Eshift=τpwb_ra)
+
+## 4 Valves
+@named AV = ShiValve(CQ=CQ_AV, Kp=Kp_av, Kf=Kf_av, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+@named MV = ShiValve(CQ=CQ_MV, Kp=Kp_mv, Kf=Kf_mv, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+@named TV = ShiValve(CQ=CQ_TV, Kp=Kp_tv, Kf=Kf_tv, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+@named PV = ShiValve(CQ=CQ_PV, Kp=Kp_pv, Kf=Kf_pv, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+
+####### Systemic Loop #######
+## Systemic Aortic Sinus ##
+@named SAS = CRL(C=Csas, R=Rsas, L=Lsas)
+## Systemic Artery ##
+@named SAT = CRL(C=Csat, R=Rsat, L=Lsat)
+## Systemic Arteriole ##
+@named SAR = Resistor(R=Rsar)
+## Systemic Capillary ##
+@named SCP = Resistor(R=Rscp)
+## Systemic Vein ##
+@named SVN = CR(R=Rsvn, C=Csvn)
+ 
+####### Pulmonary Loop #######
+## Pulmonary Aortic Sinus ##
+@named PAS = CRL(C=Cpas, R=Rpas, L=Lpas)
+## Pulmonary Artery ##
+@named PAT = CRL(C=Cpat, R=Rpat, L=Lpat)
+## Pulmonary Arteriole ##
+@named PAR = Resistor(R=Rpar)
+## Pulmonary Capillary ##
+@named PCP = Resistor(R=Rpcp)
+## Pulmonary Vein ##
+@named PVN = CR(R=Rpvn, C=Cpvn)
+
+shi_eqs = [
+    connect(LV.out, AV.in)
+    connect(AV.out, SAS.in)
+    connect(SAS.out, SAT.in)
+    connect(SAT.out, SAR.in)
+    connect(SAR.out, SCP.in)
+    connect(SCP.out, SVN.in)
+    connect(SVN.out, RA.in)
+    connect(RA.out, TV.in)
+    connect(TV.out, RV.in)
+    connect(RV.out, PV.in)
+    connect(PV.out, PAS.in)
+    connect(PAS.out, PAT.in)
+    connect(PAT.out, PAR.in)
+    connect(PAR.out, PCP.in)
+    connect(PCP.out, PVN.in)
+    connect(PVN.out, LA.in)
+    connect(LA.out, MV.in)
+    connect(MV.out, LV.in)
+]
+```
+:::
+:::
+
+
+## Example: compound elements 1{.smaller}
+
+
+:::{.panel-tabset}
+### Compound element
+
+:::{.columns}
+
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![A simple full circulatory system model [@doi:10.1080/03091902.2019.1576792]  ](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+:::
+
+:::{.column}
+
+```julia
+`"""
+`ShiSystemicLoop(; name, SAS_C, SAS_R, SAS_L, SAT_C, SAT_R, SAT_L, SAR_R, SCP_R, SVN_C, SVN_R)`
+
+Implements systemic loop as written by Shi in [Shi].
+
+Parameters are in the cm, g, s system.
+Pressure in mmHg.
+Volume in ml.
+Flow in cm^3/s (ml/s).
+
+Named parameters:
+
+`SAS_C`:   Aortic sinus compliance in ml/mmHg
+
+`SAS_R`:   Aortic sinus resistance in mmHg*s/ml
+
+`SAS_L`:   Aortic sinus inductance in mmHg*s^2/ml
+
+`SAT_C`:   Artery compliance in ml/mmHg
+
+`SAT_R`:   Artery resistance in mmHg*s/ml
+
+`SAT_L`:   Artery inductance in mmHg*s^2/ml
+
+`SAR_R`:   Arteriole resistance in mmHg*s/ml
+
+`SCP_R`:   Capillary resistance in mmHg*s/ml
+
+`SVN_C`:   Vein compliance in ml/mmHg
+
+`SVN_R`:   Vein resistance in mmHg*s/ml
+"""
+function ShiSystemicLoop(; name, SAS_C, SAS_R, SAS_L, SAT_C, SAT_R, SAT_L, SAR_R, SCP_R, SVN_C, SVN_R)
+        @named in = Pin()
+        @named out = Pin()
+
+        sts = @variables Δp(t) = 0.0 q(t) = 0.0
+        ps = []
+        # No parameters in this function
+
+        # These are the components the subsystem is made of:
+        ## Systemic Aortic Sinus ##
+        @named SAS = CRL(C=SAS_C, R=SAS_R, L=SAS_L)
+        ## Systemic Artery ##
+        @named SAT = CRL(C=SAT_C, R=SAT_R, L=SAT_L)
+        ## Systemic Arteriole ##
+        @named SAR = Resistor(R=SAR_R)
+        ## Systemic Capillary ##
+        @named SCP = Resistor(R=SCP_R)
+        ## Systemic Vein ##
+        @named SVN = CR(C=SVN_C, R=SVN_R)
+
+        # The equations for the subsystem are created by
+        # 'connect'-ing the components
+        eqs = [
+                Δp ~ out.p - in.p
+                q ~ in.q
+                connect(in, SAS.in)
+                connect(SAS.out, SAT.in)
+                connect(SAT.out, SAR.in)
+                connect(SAR.out, SCP.in)
+                connect(SCP.out, SVN.in)
+                connect(SVN.out, out)
+        ]
+
+        # and finaly compose the system
+        compose(ODESystem(eqs, t, sts, ps; name=name), in, out, SAS, SAT, SAR, SCP, SVN)
+end
+```
+:::
+:::
+### Connections
+:::{.columns}
+
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![A simple full circulatory system model [@doi:10.1080/03091902.2019.1576792]  ](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+:::
+
+:::{.column}
+
+
+```julia
+## 4 Chambers
+@named LV = ShiChamber(V₀=v0_lv, p₀ = p0_lv, Eₘᵢₙ=Emin_lv, Eₘₐₓ=Emax_lv, τ=τ, τₑₛ=τes_lv, τₑₚ=τed_lv, Eshift=0.0)
+@named LA = ShiChamber(V₀=v0_la, p₀ = p0_la, Eₘᵢₙ=Emin_la, Eₘₐₓ=Emax_la, τ=τ, τₑₛ=τpww_la/2, τₑₚ=τpww_la, Eshift=τpwb_la)
+@named RV = ShiChamber(V₀=v0_rv, p₀ = p0_rv, Eₘᵢₙ=Emin_rv, Eₘₐₓ=Emax_rv, τ=τ, τₑₛ=τes_rv, τₑₚ=τed_rv, Eshift=0.0)
+@named RA = ShiChamber(V₀=v0_ra, p₀ = p0_ra, Eₘᵢₙ=Emin_ra, Eₘₐₓ=Emax_ra, τ=τ, τₑₛ=τpww_ra/2, τₑₚ =τpww_ra, Eshift=τpwb_ra)
+
+## Circulatory Loops
+@named Sys_loop = ShiSystemicLoop(SAS_C=Csas, SAS_R=Rsas, SAS_L=Lsas, SAT_C=Csat, SAT_R=Rsat, SAT_L=Lsat, SAR_R=Rsar, SCP_R=Rscp, SVN_C=Csvn, SVN_R=Rsvn)
+@named Pul_loop = ShiPulmonaryLoop(PAS_C=Cpas, PAS_R=Rpas, PAS_L=Lpas, PAT_C=Cpat, PAT_R=Rpat, PAT_L=Lpat, PAR_R=Rpar, PCP_R=Rpcp, PVN_C=Cpvn, PVN_R=Rpvn)
+ 
+## 4 Valves
+@named AV = ShiValve(CQ=CQ_AV, Kp=Kp_av, Kf=Kf_av, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+@named MV = ShiValve(CQ=CQ_MV, Kp=Kp_mv, Kf=Kf_mv, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+@named TV = ShiValve(CQ=CQ_TV, Kp=Kp_tv, Kf=Kf_tv, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+@named PV = ShiValve(CQ=CQ_PV, Kp=Kp_pv, Kf=Kf_pv, Kb= 0.0, Kv=3.5, θmax=75.0 * pi / 180, θmin=5.0 * pi / 180)
+
+shi_eqs = [
+    connect(LV.out, AV.in)
+    connect(AV.out, Sys_loop.in)
+    connect(Sys_loop.out, RA.in)
+    connect(RA.out, TV.in)
+    connect(TV.out, RV.in)
+    connect(RV.out, PV.in)
+    connect(PV.out, Pul_loop.in)
+    connect(Pul_loop.out, LA.in)
+    connect(LA.out, MV.in)
+    connect(MV.out, LV.in)
+]
+```
+
+:::
+:::
+:::
+ 
+## Example: compound elements 2{.smaller}
+
+
+:::{.panel-tabset}
+### Compound element
+
+:::{.columns}
+
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![A simple full circulatory system model [@doi:10.1080/03091902.2019.1576792]  ](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+:::
+
+:::{.column}
+
+```julia"""
+`ShiHeart(; name, τ, LV_V₀, LV_p0, LV_Emin, LV_Emax, LV_τes, LV_τed, LV_Eshift, RV_V₀, RV_p0, RV_Emin, RV_Emax, RV_τes, RV_τed, RV_Eshift, LA_V₀, LA_p0, LA_Emin, LA_Emax, LA_τes, LA_τed, LA_Eshift, RA_V₀, RA_p0, RA_Emin, RA_Emax, RA_τes, RA_τed, RA_Eshift, AV_CQ, AV_Kp, AV_Kf, AV_Kb, AV_Kv, AV_θmax, AV_θmin, PV_CQ, PV_Kp, PV_Kf, PV_Kb, PV_Kv, PV_θmax, PV_θmin, MV_CQ, MV_Kp, MV_Kf, MV_Kb, MV_Kv, MV_θmax, MV_θmin, TV_CQ, TV_Kp, TV_Kf, TV_Kb, TV_Kv, TV_θmax, TV_θmin)`
+
+Models a whole heart, made up of 2 ventricles (Left & Right Ventricle) and 2 atria (Left & Right atrium)
+created from the ShiChamber element. Includes the 4 corresponding valves (Aortic, Mitral, Pulmonary and Tricuspid valve) created using the ShiValve element.
+
+Parameters are in the cm, g, s system.
+Pressure in mmHg.
+Volume in ml.
+Flow in cm^3/s (ml/s).
+Maximum and Minimum angles given in rad, to convert from degrees multiply angle by pi/180.
+
+Named parameters:
+
+`τ`         Length of the cardiac cycle in s
+
+`LV_V₀`     Unstressed left ventricular volume in ml
+
+`LV_p0`     Unstressed left ventricular pressure in mmHg
+
+`LV_Emin`   Minimum left ventricular elastance (diastole) in mmHg/ml
+
+`LV_Emax`   Maximum left ventricular elastance (systole) in mmHg/ml
+
+`LV_τes`    Left ventricular end systolic time in s
+
+`LV_τed`    Left ventricular end distolic time in s
+
+`LV_Eshift` Shift time of contraction - 0 for left ventricle
+
+`RV_V₀`     Unstressed right ventricular volume in ml
+
+`RV_p0`     Unstressed right ventricular pressure in mmHg
+
+`RV_Emin`   Minimum right ventricular elastance (diastole) in mmHg/ml
+
+`RV_Emax`   Maximum right ventricular elastance (systole) in mmHg/ml
+
+`RV_τes`    Right ventricular end systolic time in s
+
+`RV_τed`    Right ventricular end distolic time in s
+
+`RV_Eshift` Shift time of contraction - 0 for right ventricle
+
+`LA_V₀`     Unstressed left atrial volume in ml
+
+`LA_p0`     Unstressed left atrial pressure in mmHg
+
+`LA_Emin`   Minimum left atrial elastance (diastole) in mmHg/ml
+
+`LA_Emax`   Maximum left atrial elastance (systole) in mmHg/ml
+
+`LA_τes`    Left atrial end systolic time in s
+
+`LA_τed`    Left atrial end distolic time in s
+
+`LA_Eshift` Shift time of contraction in s
+
+`RA_V₀`     Unstressed right atrial volume in ml
+
+`RA_p0`     Unstressed right atrial pressure in mmHg
+
+`RA_Emin`   Minimum right atrial elastance (diastole) in mmHg/ml
+
+`RA_Emax`   Maximum right atrial elastance (systole) in mmHg/ml
+
+`RA_τes`    Right atrial end systolic time in s
+
+`RA_τed`    Right atrial end distolic time in s
+
+`RA_Eshift` Shift time of contraction in s
+
+`AV_CQ`     Aortic valve flow coefficent in ml/(s*mmHg^0.5)
+
+`AV_Kp`     Pressure effect on the aortic valve in rad/(s^2*mmHg)
+
+`AV_Kf`     Frictional effect on the aortic valve in 1/s
+
+`AV_Kb`     Fluid velocity effect on the aortic valve in rad/(s*m)
+
+`AV_Kv`     Vortex effect on the aortic valve in rad/(s*m)
+
+`AV_θmax`   Aortic valve maximum opening angle in rad
+
+`AV_θmin`   Aortic valve minimum opening angle in rad
+
+`MV_CQ`     Mitral valve flow coefficent in ml/(s*mmHg^0.5)
+
+`MV_Kp`     Pressure effect on the mitral valve in rad/(s^2*mmHg)
+
+`MV_Kf`     Frictional effect on the mitral valve in 1/s
+
+`MV_Kb`     Fluid velocity effect on the mitral valve in rad/(s*m)
+
+`MV_Kv`     Vortex effect on the mitral valve in rad/(s*m)
+
+`MV_θmax`   Mitral valve maximum opening angle in rad
+
+`MV_θmin`   Mitral valve minimum opening angle in rad
+
+`PV_CQ`     Pulmonary valve flow coefficent in ml/(s*mmHg^0.5)
+
+`PV_Kp`     Pressure effect on the pulmonary valve in rad/(s^2*mmHg)
+
+`PV_Kf`     Frictional effect on the pulmonary valve in 1/s
+
+`PV_Kb`     Fluid velocity effect on the pulmonary valve in rad/(s*m)
+
+`PV_Kv`     Vortex effect on the pulmonary valve in rad/(s*m)
+
+`PV_θmax`   Pulmonary valve maximum opening angle in rad
+
+`PV_θmin`   Pulmonary valve minimum opening angle in rad
+
+`TV_CQ`     Tricuspid valve flow coefficent in ml/(s*mmHg^0.5)
+
+`TV_Kp`     Pressure effect on the tricuspid valve in rad/(s^2*mmHg)
+
+`TV_Kf`     Frictional effect on the tricuspid valve in 1/s
+
+`TV_Kb`     Fluid velocity effect on the tricuspid valve in rad/(s*m)
+
+`TV_Kv`     Vortex effect on the pulmonary valve in rad/(s*m)
+
+`TV_θmax`   Tricuspid valve maximum opening angle in rad
+
+`TV_θmin`   Tricuspid valve minimum opening angle in rad
+"""
+function ShiHeart(; name, τ, LV_V₀, LV_p0, LV_Emin, LV_Emax, LV_τes, LV_τed, LV_Eshift, RV_V₀, RV_p0, RV_Emin, RV_Emax, RV_τes, RV_τed, RV_Eshift, LA_V₀, LA_p0, LA_Emin, LA_Emax, LA_τes, LA_τed, LA_Eshift, RA_V₀, RA_p0, RA_Emin, RA_Emax, RA_τes, RA_τed, RA_Eshift, AV_CQ, AV_Kp, AV_Kf, AV_Kb, AV_Kv, AV_θmax, AV_θmin, PV_CQ, PV_Kp, PV_Kf, PV_Kb, PV_Kv, PV_θmax, PV_θmin, MV_CQ, MV_Kp, MV_Kf, MV_Kb, MV_Kv, MV_θmax, MV_θmin, TV_CQ, TV_Kp, TV_Kf, TV_Kb, TV_Kv, TV_θmax, TV_θmin)
+        @named LHin = Pin()
+        @named LHout = Pin()
+        @named RHin = Pin()
+        @named RHout = Pin()
+
+        sts = @variables Δp(t) = 0.0 q(t) = 0.0
+        # sts = []
+        # ps = @parameters Rc=Rc Rp=Rp C=C
+        # No parameters in this function
+        # Parameters are inherited from subcomponents
+        ps = []
+
+        # These are the components the subsystem is made of:
+        # Ventricles and atria
+        @named LV = ShiChamber(V₀=LV_V₀, p₀=LV_p0, Eₘᵢₙ=LV_Emin, Eₘₐₓ=LV_Emax, τ=τ, τₑₛ=LV_τes, τₑₚ=LV_τed, Eshift=LV_Eshift)
+        @named LA = ShiChamber(V₀=LA_V₀, p₀=LA_p0, Eₘᵢₙ=LA_Emin, Eₘₐₓ=LA_Emax, τ=τ, τₑₛ=LA_τes, τₑₚ=LA_τed, Eshift=LA_Eshift)
+        @named RV = ShiChamber(V₀=RV_V₀, p₀=RV_p0, Eₘᵢₙ=RV_Emin, Eₘₐₓ=RV_Emax, τ=τ, τₑₛ=RV_τes, τₑₚ=RV_τed, Eshift=RV_Eshift)
+        @named RA = ShiChamber(V₀=RA_V₀, p₀=RA_p0, Eₘᵢₙ=RA_Emin, Eₘₐₓ=RA_Emax, τ=τ, τₑₛ=RA_τes, τₑₚ=RA_τed, Eshift=RA_Eshift)
+        # Valves
+        @named AV = ShiValve(CQ=AV_CQ, Kp=AV_Kp, Kf=AV_Kf, Kb=AV_Kb, Kv=AV_Kv, θmax=AV_θmax, θmin=AV_θmin)
+        @named MV = ShiValve(CQ=MV_CQ, Kp=MV_Kp, Kf=MV_Kf, Kb=MV_Kb, Kv=MV_Kv, θmax=MV_θmax, θmin=MV_θmin)
+        @named TV = ShiValve(CQ=TV_CQ, Kp=TV_Kp, Kf=TV_Kf, Kb=TV_Kb, Kv=TV_Kv, θmax=TV_θmax, θmin=TV_θmin)
+        @named PV = ShiValve(CQ=PV_CQ, Kp=PV_Kp, Kf=PV_Kf, Kb=PV_Kb, Kv=PV_Kv, θmax=PV_θmax, θmin=PV_θmin)
+        # The equations for the subsystem are created by
+        # 'connect'-ing the components
+
+        eqs = [
+                Δp ~ out.p - in.p
+                q ~ in.q
+                connect(LHin, LA.in)
+                connect(LA.out, MV.in)
+                connect(MV.out, LV.in)
+                connect(LV.out, AV.in)
+                connect(AV.out, LHout)
+                connect(RHin, RA.in)
+                connect(RA.out, TV.in)
+                connect(TV.out, RV.in)
+                connect(RV.out, PV.in)
+                connect(PV.out, RHout)
+        ]
+        # and finaly compose the system
+        compose(ODESystem(eqs, t, sts, ps; name=name), in, out, LHin, LHout, RHin, RHout, LV, RV, LA, RA, AV, MV, TV, PV)
+end
+```
+:::
+:::
+### Connections
+:::{.columns}
+
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/Publications/Valve-Paper/text/images/fig-shi-diagram.png, accessed: Sun Jul 16 14:11:15 2023 -->
+![A simple full circulatory system model [@doi:10.1080/03091902.2019.1576792]  ](./images/images_for_CSM_Presentation.qmd/fig-shi-diagram.png)
+
+:::
+
+:::{.column}
+```julia
+## Shi Heart
+@named Heart = ShiHeart()
+
+## Circulatory Loops
+@named Sys_loop = ShiSystemicLoop()
+@named Pul_loop = ShiPulmonaryLoop()
+ 
+shi_eqs = [
+    connect(Heart.LHout)
+    connect(AV.out, Sys_loop.in)
+    connect(Sys_loop.out, Heart.RHin)
+    connect(Heart.RHout, Pul_loop.in)
+    connect(Pul_loop.out, Heart.LHin)
+]
+```
+
+:::
+:::
+:::
+ 
+## Exchange valve models{.smaller}
+
+::::{.columns}
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/SaxtonPhD/0D-ModellingInJulia_files/images/shi_results.png, accessed: Wed Jul 19 12:31:00 2023 -->
+![Modified Shi Valve [@Korakianitis2006]](./images/images_for_CSM_Presentation.qmd/shi_results.png)
+:::
+:::{.column}
+<!-- Source: file:///home/thor/Documents/Research/SaxtonPhD/0D-ModellingInJulia_files/images/new_results.png, accessed: Wed Jul 19 12:31:58 2023 -->
+![(Schenkel, Saxton, Asquith) Valve](./images/images_for_CSM_Presentation.qmd/new_results.png)
+:::
+::::
+
+Change valve model by changing 4 lines of code^[Not including the definition of the valve mechanics itself.]. Introduce stenosis by changing stenosis parameter in 1 line of code. Quick simulation of variations (0.3s for Shi valve, 2.5s for new mechanistic, non-linear valve model).
+
+## Comparison to CellML
+
+[CellML](https://cellml.org) is a modelling framework for biological modelling that has been developed since the early 1990s. While it is still being used, development seems to have stagnated somewhat. The main runtime engine for CellML is [OpenCOR](https://www.cellml.org/getting-started/tutorials/opencordemo), which is implemented in C++, but limited to CellML v1.0^[Note: The C++ framework is not as flexible as the Julia framework, though, and many of the more advanced cellML models can only be run in Julia, since many of the tools in cellML seem to be stagnant and unsupported. OpenCell had it’s last release in 2010 and I could not get it to work on either Windows or Linux. OpenCOR is limited to cellML format 1.0 while most of the models in the repository are version 1.1.].
+
+
+I could not find a cardiovascular model that would run in OpenCOR, so for comparison of performance we compare to models that were tested in the Julia implementation of CellML [CellMLToolkit](https://github.com/SciML/CellMLToolkit.jl): the simpler, electrophysiological models, O’Hara-Rudy, and ten Tusscher-Noble-Noble-Panfilov.
+
+
+| Model | Solver | OpenCOR | Julia |
+|-------+--------+---------+-------|
+| OR    | CVODE  | 31ms    | 23ms  |
+| tTNNP | CVODE  | 7ms     | 8.3ms |
+
+  So we have parity between those two implementations of the CellML modelling framework, one in C++, the other in Julia.
+  
+## Julia or CellML for CellML models?
+
+:::{.columns}
+
+:::{.column}
+Key Advantages:
+
+:::{.incremental}
+  - flexibility
+  - easier syntax and composability^[at least in my opinion]
+  - can read majority of CellML models and convert to ModelingToolkit (MTK) models^[In fact, the Julia version of CellML is the only one I could get to work on the cardiovascular system models! OpenCell is outdated and does not run on modern OSs, OpenCOR is limited to CellML v1.0.]
+  - equal performance as native C++ implementation in OpenCOR
+  - integration into wider SciML framework: Optimisation, Identifiability, Global Sensitivity
+  - very active developer community which are approachable
+:::
+
+:::
+
+:::{.column}
+
+Key Disadvantages:
+
+:::{.incremental}
+  - not yet established in the field
+  - not unit aware (current development will change this!)
+:::
+
+:::
+
+:::
+
+# References
