@@ -1,0 +1,725 @@
+/**
+ * SPDX-FileCopyrightText: 2014-2016 Hakim El Hattab
+ * SPDX-FileCopyrightText: 2017-2020 Jens Lechtenbörger
+ *
+ * SPDX-License-Identifier: LicenseRef-MIT-HEH-JL
+ *
+ * Simple presentation theme, based on 'white' theme for reveal.js
+ * by Hakim El Hattab, http://hakim.se
+ *
+ * Note that this CSS file is meant to be used with source-sans-pro.css, which
+ * was imported here previously.  Imports lead to additional round-trips
+ * upon loading, though.  Thus, source-sans-pro.css is now added via
+ * REVEAL_EXTRA_CSS in org/config.org.
+ */
+section.has-dark-background, section.has-dark-background h1, section.has-dark-background h2, section.has-dark-background h3, section.has-dark-background h4, section.has-dark-background h5, section.has-dark-background h6 {
+  color: #fff; }
+
+/*********************************************
+ * GLOBAL STYLES
+ *********************************************/
+body {
+  background: #ddd;
+  background-color: #ddd; }
+
+.reveal-viewport {
+  background: #ddd;
+  background-color: #ddd; }
+
+.reveal {
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: normal;
+  color: #222; }
+
+::selection {
+  color: #fff;
+  background: #740232;
+  text-shadow: none; }
+
+::-moz-selection {
+  color: #fff;
+  background: #740232;
+  text-shadow: none; }
+
+.reveal .slides section,
+.reveal .slides section > section {
+  line-height: 1.3;
+  font-weight: inherit;
+  padding: 0px 0px; }
+
+.reveal .slides li {
+  line-height: 1.1;
+  margin: 0.5ex 0px 0px 0px; }
+
+.reveal .slides li p {
+  line-height: 1.1;
+  margin: 0.5ex 0px 0px 0px; }
+
+.reveal .slides section .fragment.highlight-red.visible {
+  font-weight: bold;
+  color: #740232; }
+
+.reveal .slides section .fragment.gray-out {
+  opacity: 1;
+  visibility: inherit; }
+
+.reveal .slides section .fragment.gray-out.visible {
+  opacity: 0.5; }
+
+.reveal .slides section .fragment.shrink.visible {
+    -webkit-transform: scale(0.7);
+            transform: scale(0.7);
+   -webkit-transform-origin: left;
+           transform-origin: left; }
+
+.reveal .slides section .fragment.grow.visible {
+    -webkit-transform: scale(1.3);
+            transform: scale(1.3);
+   -webkit-transform-origin: left;
+           transform-origin: left; }
+
+
+#sec-title-slide aside.notes {
+  background: none; }
+
+.reveal aside.notes:hover, .reveal aside.notes:active {
+  opacity: 1.0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.55); }
+
+.reveal aside.notes p, .reveal aside.notes ul, .reveal aside.notes ol, .reveal aside.notes li {
+  display: none; }
+
+
+/*********************************************
+ * HEADERS
+ *********************************************/
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 20px 0;
+  top: 0;
+  left: 0;
+  color: #740232;
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  /* font-weight: 600;
+  line-height: 1.1; */
+  letter-spacing: normal;
+  text-align: left;
+  text-shadow: none;
+  word-wrap: break-word; }
+
+/* h1 is used on the title slide. */
+/* .reveal h1 {
+/*   font-size: 2.2em; }
+/* 
+/* /* h2 is used for sections that appear in the TOC. */
+/* .reveal h2 {
+/*   font-size: 2.2em;
+/*   text-align: center; }
+/* 
+/* .reveal h3 {
+/*   font-size: 1.3em; }
+/* 
+/* .reveal h4 {
+/*   font-size: 1.3em; }
+/* 
+/* /* Footer; TOC progress plugin has height 9.5vh. */
+/* .reveal .slide-footer {
+/*   height: 9.8vh;
+/*   pointer-events: none;
+/*   clear: both; }
+
+/*********************************************
+ * SLIDES
+ *********************************************/
+
+.reveal .slides {
+  text-align: left; }
+
+.reveal .boxed {
+  float: center;
+  background-color: rgba(116,2,15,0.2);
+  text-align: center; }
+
+.reveal .small {
+  float: center;
+  font-size: .5em;
+  text-align: center; }
+
+.reveal .floatright {
+  float: right;
+  text-align: right; }
+
+.reveal .leftcol {
+  float: left;
+  width: 48%; }
+
+.reveal .rightcol {
+  float: right;
+  width: 48%; }
+
+.reveal .leftcol30 {
+  float: left;
+  width: 28%; }
+
+.reveal .rightcol30 {
+  float: right;
+  width: 28%; }
+
+.reveal .leftcol40 {
+  float: left;
+  width: 38%; }
+
+.reveal .rightcol40 {
+  float: right;
+  width: 38%; }
+
+.reveal .leftcol60 {
+  float: left;
+  width: 58%; }
+
+.reveal .rightcol60 {
+  float: right;
+  width: 58%; }
+
+.reveal .leftcol70 {
+  float: left;
+  width: 68%; }
+
+.reveal .rightcol70 {
+  float: right;
+  width: 68%; }
+
+/* New columns with background highlights */
+.reveal .leftcolhl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 48%; }
+
+.reveal .rightcolhl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 48%; }
+
+.reveal .leftcol30hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 28%; }
+
+.reveal .rightcol30hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 28%; }
+
+.reveal .leftcol40hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 38%; }
+
+.reveal .rightcol40hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 38%; }
+
+.reveal .leftcol60hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 58%; }
+
+.reveal .rightcol60hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 58%; }
+
+.reveal .leftcol70hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 68%; }
+
+.reveal .rightcol70hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 68%; }
+
+/*******************************************************************
+ * Figures without captions
+ *
+ * With Org-Reveal, by defaults those are converted into plain imgs.
+ * Float to the right.
+ ******************************************************************/
+
+.reveal img {
+  margin: 5px 5px;
+  float: right;
+}
+
+/*******************************************************************
+ * Figures with captions
+ *
+ * With Org-Reveal, by default those are converted into divs.
+ * If they are contained inside lists, let them float to the right.
+ * Otherwise, center.
+ * Omit figure numbers, center captions.
+ ******************************************************************/
+
+/* Center by default.
+ * Right padding is to make space for the rotated license text
+ * (if present). */
+.reveal .imgcontainer, .reveal figure, .reveal div.figure, .reveal svg {
+  position: relative;
+  padding-right: 4vw;
+  text-align: center; }
+
+.reveal .imgcontainer figure, .reveal .imgcontainer div.figure {
+  margin: 3px 5px;
+  display: inline-block; }
+
+.reveal div.figure img {
+  float: none; }
+
+/* No figure and table numbers. */
+.reveal .figure-number, .reveal .table-number {
+  display: none; }
+
+/* Adjust background color for slide number.
+ * Use color of TOC footer (hard-coded in reveal-config.el). */
+.reveal .slide-number {
+  background-color: rgba(120,138,130,0.2); }
+
+/* Right in lists. */
+.reveal li > figure,
+.reveal li > div.figure {
+  float: right; }
+
+/* Org embeds img elements into p elements without text. */
+.reveal div.figure p {
+  margin: 0;
+  line-height: 1.0; }
+
+/* Org creates caption as sibling, I as second child. */
+.reveal div.figure + p, .reveal div.figure p:nth-child(2), .reveal figcaption {
+  margin: 0;
+  font-size: .5em;
+  line-height: 1.0;
+  color: rgba(34, 34, 34, 1); }
+
+/* Display license of image rotated, in smaller font.
+   Move to right, with same amount as padding-right above. */
+.reveal div.figure p:nth-child(3) {
+  font-size: .35em;
+  opacity: 0.66;
+  text-align: right;
+  margin: 5px;
+  position: absolute;
+  right: 4vw;
+  top: 0px;
+  -webkit-transform: rotate(-90deg);
+          transform: rotate(-90deg);
+  -webkit-transform-origin: top right;
+          transform-origin: top right; }
+
+/*********************************************
+ * OTHER
+ *********************************************/
+
+div.legalese {
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-size: 1.4vh;
+  position: fixed;
+  left: 3px;
+  bottom: 3px;
+  z-index: 50; }
+
+div.legalese p { margin: 0; }
+div.legalese a { text-decoration: none; }
+
+div.ribbon-legalese {
+  z-index: 50;
+  color: #fff;
+  background: #107010;
+  font-size: 14px;
+  text-align: center;
+  padding: 3px 10px;
+  width: 260px;
+  line-height: 0.3em;
+  position: absolute;
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+  top: 30px;
+  left: -75px;
+  box-shadow: 0px 5px 10px rgba(0,0,0,0.55); }
+
+div.ribbon-legalese a {
+  color: #fff;
+  text-decoration: none;
+}
+
+#forkmeongitlab a, #forkmeongitlab-right a {
+  z-index: 20;
+  color: #fff;
+  background: #107010;
+  text-decoration: none;
+  text-align: center;
+  padding: 3px 20px;
+  font-size: 1em;
+  width: 180px;
+  position: absolute;
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+  box-shadow: 0px 5px 10px rgba(0,0,0,0.55); }
+
+#forkmeongitlab a {
+  line-height: 1.4em;
+  top: 45px;
+  left: -50px; }
+
+#forkmeongitlab-right a {
+  line-height: 1.5em;
+  padding: 5px 30px;
+  width: 180px;
+  top: 50px;
+  right: -50px;
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  box-shadow: 0px 5px 10px rgba(0,0,0,0.55); }
+
+#forkmeongitlab a:hover, #forkmeongitlab-right a:hover {
+  font-weight: bold; }
+
+#slide-license p {
+  font-size: .8em; }
+
+.reveal .talk-title {
+  margin: 80px 0px 30px 0px; }
+
+.subtitle {
+  font-size: 1.6em;
+  text-align: left}
+
+.author {
+  text-align:left;
+   /* Nothing special */ }
+
+.reveal .keyboard-usage p {
+  margin: 1ex 0;
+  font-size: 0.5em;
+  color: rgba(0,0,0,0.6); }
+
+.reveal p {
+  margin: 20px 0;
+  line-height: 1.3; }
+
+/* Ensure certain elements are never larger than the slide itself */
+.reveal img,
+.reveal div.figure,
+.reveal figure,
+.reveal object,
+.reveal svg,
+.reveal video,
+.reveal iframe {
+  max-width: 90%;
+  max-height: 25ex; }
+
+/* center videos */
+.reveal video {
+  display: block;
+  margin: 1ex auto; }
+
+.reveal .smaller, .reveal .smaller-nomargin, .reveal .slide-source {
+  line-height: 1.1;
+  font-size: 0.6em; }
+
+.reveal .smaller-nomargin {
+  margin: 0; }
+
+.reveal .slide-source {
+  text-align: right;
+  clear: both;
+  opacity: 0.6; }
+
+.reveal strong,
+.reveal b {
+  font-weight: bold;
+  color: #740232; }
+
+.reveal em {
+  font-style: italic; }
+
+.reveal ol,
+.reveal dl,
+.reveal ul {
+  text-align: left;
+  margin: 0; }
+
+.reveal ol {
+  list-style-type: decimal; }
+
+.reveal ul {
+  list-style-type: disc; }
+
+.reveal ul ul {
+  list-style-type: square; }
+
+.reveal ul ul ul {
+  list-style-type: circle; }
+
+.reveal ul ul,
+.reveal ul ol,
+.reveal ol ol,
+.reveal ol ul {
+  display: block;
+  font-size: 0.8em;
+  margin-left: 0; }
+
+/* .reveal .org-ref-bib {
+  font-size: 0.6em;
+  overflow: auto;
+  padding-right: 5px;
+  max-height: 22em; }
+
+.reveal .org-ref-bib li {
+  padding-left: 1em;
+  text-indent: 1em;
+  list-style-type: none;
+  line-height: normal; }
+
+.reveal .csl-bib-body {
+  font-size: 0.6em;
+  overflow: auto;
+  padding-right: 5px;
+  max-height: 22em; }
+
+.reveal .csl-bib-body li {
+  padding-left: 1em;
+  text-indent: 1em;
+  list-style-type: none;
+  line-height: normal; } */
+
+.reveal dt {
+  font-weight: bold; }
+
+.reveal dd {
+  margin-left: 40px; }
+
+.reveal q,
+.reveal blockquote {
+  quotes: none; }
+
+.reveal blockquote {
+  display: block;
+  position: relative;
+  width: 90%;
+  margin: 20px auto;
+  padding: 5px;
+  font-style: italic;
+  font-size: 0.8em;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2); }
+
+.reveal blockquote p:first-child,
+.reveal blockquote p:last-child {
+  display: inline-block; }
+
+.reveal q {
+  font-style: italic; }
+
+.reveal pre {
+  display: inline-block;
+  padding: 0.5em 1em;
+  position: relative;
+  margin: 1ex auto;
+  overflow: auto;
+  line-height: 1.2em;
+  max-height: 22em;
+  max-width: 95%;
+  text-align: left;
+  font-size: 0.55em;
+  font-family: monospace;
+  word-wrap: normal;
+  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3); }
+
+.reveal code {
+  color: dimgrey;
+  background: whitesmoke;
+  font-family: monospace; }
+
+.reveal pre code {
+  display: block;
+  padding: 5px;
+  overflow: auto;
+  max-height: 400px;
+  word-wrap: normal; }
+
+.reveal section table {
+  margin: 20px auto;
+  line-height: 1.1;
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+.reveal section table th {
+  background-color: #a0a0a0;
+  font-weight: bold; }
+
+.reveal section table tr:nth-child(even) {
+  background-color: whitesmoke; }
+
+.reveal section table th,
+.reveal section table td {
+  font-size: 0.8em;
+  text-align: left;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  border-bottom: 2px solid; }
+
+.reveal .emacs-table td {
+  font-size: 0.6em; }
+
+.reveal .emacs-table th {
+  font-size: 0.7em; }
+
+.reveal section table th[align="center"],
+.reveal section table td[align="center"] {
+  text-align: center; }
+
+.reveal section table th[align="right"],
+.reveal section table td[align="right"] {
+  text-align: right; }
+
+.reveal .org-center {
+  text-align: center; }
+
+.reveal .org-right {
+  text-align: right; }
+
+.reveal section table tbody tr:last-child th,
+.reveal section table tbody tr:last-child td {
+  border-bottom: none; }
+
+.reveal sup {
+  vertical-align: super;
+  font-size: 70%;
+  line-height: 0; }
+
+.reveal sub {
+  vertical-align: sub;
+  font-size: 70%;
+  line-height: 0; }
+
+.reveal small {
+  display: inline-block;
+  font-size: 0.6em;
+  line-height: 1.2em;
+  vertical-align: top; }
+
+.reveal small * {
+  vertical-align: top; }
+
+/*********************************************
+ * LINKS
+ *********************************************/
+.reveal a[href].hiddenlink {
+  color: #222;
+  text-decoration: none; }
+
+.reveal a[href]:not(.hiddenlink) {
+  color: #00568a;
+  text-decoration: none;
+  -webkit-transition: color .15s ease;
+  -moz-transition: color .15s ease;
+  transition: color .15s ease; }
+
+.reveal a[href^="http"]:not(.hiddenlink), .reveal a[href^="news:"], .reveal a[href^="mailto:"], .reveal a[href^="ftp:"] {
+  color: #107010; }
+
+.reveal a[href^="https://oer.gitlab.io"]:not(.hiddenlink) {
+  color: #00568a; }
+
+/* Show icon for outgoing/external link.
+   Positioning without line break after icon based on this:
+   https://stackoverflow.com/questions/16100956/prevent-after-element-from-wrapping-to-next-line
+   Icon (drawn with mtPaint) released into Public Domain.
+   Icon neither shown for .nooutlink,
+   nor inside figures, nor src blocks, nor for empty hyperlinks. */
+.reveal a[href]:not(.nooutlink):after {
+  content: "";
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAADAFBMVEUAAAD/AAAA/wD//wAAAP//AP8A///////b29u2traSkpJtbW1JSUkkJCTbAAC2AACSAABtAABJAAAkAAAA2wAAtgAAkgAAbQAASQAAJADb2wC2tgCSkgBtbQBJSQAkJAAAANsAALYAAJIAAG0AAEkAACTbANu2ALaSAJJtAG1JAEkkACQA29sAtrYAkpIAbW0ASUkAJCT/29vbtra2kpKSbW1tSUlJJCT/trbbkpK2bW2SSUltJCT/kpLbbW22SUmSJCT/bW3bSUm2JCT/SUnbJCT/JCTb/9u227aStpJtkm1JbUkkSSS2/7aS25Jttm1JkkkkbSSS/5Jt221JtkkkkiRt/21J20kktiRJ/0kk2yQk/yTb2/+2ttuSkrZtbZJJSW0kJEm2tv+SktttbbZJSZIkJG2Skv9tbdtJSbYkJJJtbf9JSdskJLZJSf8kJNskJP///9vb27a2tpKSkm1tbUlJSST//7bb25K2tm2SkkltbST//5Lb2222tkmSkiT//23b20m2tiT//0nb2yT//yT/2//bttu2kraSbZJtSW1JJEn/tv/bktu2bbaSSZJtJG3/kv/bbdu2SbaSJJL/bf/bSdu2JLb/Sf/bJNv/JP/b//+229uStrZtkpJJbW0kSUm2//+S29tttrZJkpIkbW2S//9t29tJtrYkkpJt//9J29sktrZJ//8k29sk////27bbtpK2km2SbUltSSRJJAD/tpLbkm22bUmSSSRtJAD/ttvbkra2bZKSSW1tJElJACT/krbbbZK2SW2SJEltACTbtv+2ktuSbbZtSZJJJG0kAEm2kv+SbdttSbZJJJIkAG222/+SttttkrZJbZIkSW0AJEmStv9tkttJbbYkSZIAJG22/9uS27ZttpJJkm0kbUkASSSS/7Zt25JJtm0kkkkAbSTb/7a225KStm1tkklJbSQkSQC2/5KS221ttklJkiQkbQD/tgDbkgC2bQCSSQD/ALbbAJK2AG2SAEkAtv8AktsAbbYASZIAAAAAAADPKgIEAAABAHRSTlP/////////AP//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////jbfv0AAAAF9JREFUGNNNj1ESADEEQ/2pCfe/7oaW5aMjr5lA9FVU+ZEGeGRAlpPIMSCbSE2bGOLXTBLq9kMLbJ3AY/1rQOKC62fT4PoX0AG+QObPlAxGgd7jDZ5N+cIS9C0O2CH4ABh/CXyet193AAAAAElFTkSuQmCC);
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: 50% 66%;
+  margin: 0px 1px 0px 3px;
+  padding-right: 16px; }
+
+.reveal a[href].hiddenlink:after,
+.reveal a[href^="#"]:not(.nooutlink):after,
+.reveal .figure a[href]:after, .reveal .src a[href]:after,
+.reveal a[href]:empty:after {
+  margin: 0;
+  padding-right: 0;
+  content: none;
+  background: none; }
+
+/* Indicate direction of internal link. */
+.reveal a[href].backwardlink:not(.hiddenlink):before {
+  content: "\25c2\00a0"; }
+.reveal a[href].forwardlink:not(.hiddenlink):after {
+  content: "\00a0\25b8"; }
+
+.reveal a[href]:hover {
+  font-weight: bold;
+  text-shadow: none;
+  border: none; }
+
+.reveal a[id] {
+  color: #222; }
+
+.reveal a[id]:hover {
+  font-weight: normal; }
+
+.reveal .roll span:after {
+  color: #fff;
+  background: #1a53a1; }
+
+/*********************************************
+ * IMAGES
+ *********************************************/
+
+.reveal a img {
+  -webkit-transition: all .15s linear;
+  -moz-transition: all .15s linear;
+  transition: all .15s linear; }
+
+.reveal a:hover img {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #2a76dd;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.55); }
+
+/*********************************************
+ * NAVIGATION CONTROLS
+ *********************************************/
+.reveal .controls {
+  z-index: 30; }
+
+/*********************************************
+ * PROGRESS BAR
+ *********************************************/
+.reveal .progress {
+  background: rgba(0, 0, 0, 0.2); }
+
+.reveal .progress span {
+  background: #788a82;
+  -webkit-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
+  -moz-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
+  transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985); }

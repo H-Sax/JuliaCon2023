@@ -1,0 +1,257 @@
+/**
+ * SPDX-FileCopyrightText: 2014-2016 Hakim El Hattab
+ * SPDX-FileCopyrightText: 2017-2020 Jens Lechtenbörger
+ *
+ * SPDX-License-Identifier: LicenseRef-MIT-HEH-JL
+ *
+ * Simple presentation theme, based on 'white' theme for reveal.js
+ * by Hakim El Hattab, http://hakim.se
+ *
+ * Note that this CSS file is meant to be used with source-sans-pro.css, which
+ * was imported here previously.  Imports lead to additional round-trips
+ * upon loading, though.  Thus, source-sans-pro.css is now added via
+ * REVEAL_EXTRA_CSS in org/config.org.
+ */
+section.has-dark-background, section.has-dark-background h1, section.has-dark-background h2, section.has-dark-background h3, section.has-dark-background h4, section.has-dark-background h5, section.has-dark-background h6 {
+  color: #fff; }
+
+/*********************************************
+ * GLOBAL STYLES
+ *********************************************/
+body {
+  background: #eee;
+  background-color: #eee; }
+
+.reveal-viewport {
+  background: #eee;
+  background-color: #eee; }
+
+.reveal {
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: normal;
+  color: #222; }
+
+::selection {
+  color: #eee;
+  background: #740232;
+  text-shadow: none; }
+
+::-moz-selection {
+  color: #eee;
+  background: #740232;
+  text-shadow: none; }
+
+.reveal .slides section,
+.reveal .slides section > section {
+  line-height: 1.3;
+  font-weight: inherit;
+  padding: 0px 0px; }
+
+.reveal .slides li {
+  line-height: 1.1;
+  margin: 0.5ex 0px 0px 0px; }
+
+.reveal .slides li p {
+  line-height: 1.1;
+  margin: 0.5ex 0px 0px 0px; }
+
+.reveal .slides section .fragment.highlight-red.visible {
+  font-weight: bold;
+  color: #740232; }
+
+.reveal .slides section .fragment.gray-out {
+  opacity: 1;
+  visibility: inherit; }
+
+.reveal .slides section .fragment.gray-out.visible {
+  opacity: 0.5; }
+
+.reveal .slides section .fragment.shrink.visible {
+    -webkit-transform: scale(0.7);
+            transform: scale(0.7);
+   -webkit-transform-origin: left;
+           transform-origin: left; }
+
+.reveal .slides section .fragment.grow.visible {
+    -webkit-transform: scale(1.3);
+            transform: scale(1.3);
+   -webkit-transform-origin: left;
+           transform-origin: left; }
+
+
+.reveal .talk-title {
+  margin: 80px 0px 30px 0px; }
+
+.subtitle {
+  font-size: 1.4em;
+  text-align: left}
+
+.author {
+  font-size: 0.8em;
+  text-align:left;
+   /* Nothing special */ }
+
+.institute {
+  font-size: 0.6em;
+  text-align:left;
+   /* Nothing special */ }
+
+/*********************************************
+ * HEADERS
+ *********************************************/
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 20px 0;
+  top: 0;
+  left: 0;
+  color: #740232;
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: normal;
+  text-align: left;
+  text-shadow: none;
+  word-wrap: break-word; }
+
+/* h1 is used on the title slide. */
+/* .reveal h1 {
+  font-size: 2.2em; } */
+
+/* h2 is used for sections that appear in the TOC. */
+/* .reveal h2 {
+  font-size: 2.2em;
+  text-align: center; }
+
+.reveal h3 {
+  font-size: 1.3em; }
+
+.reveal h4 {
+  font-size: 1.3em; } */
+
+/* Make these work with the new Quarto backend
+/* New columns with background highlights */
+.reveal .leftcolhl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 48%; }
+
+.reveal .rightcolhl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 48%; }
+
+.reveal .leftcol30hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 28%; }
+
+.reveal .rightcol30hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 28%; }
+
+.reveal .leftcol40hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 38%; }
+
+.reveal .rightcol40hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 38%; }
+
+.reveal .leftcol60hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 58%; }
+
+.reveal .rightcol60hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 58%; }
+
+.reveal .leftcol70hl {
+  float: left;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 68%; }
+
+.reveal .rightcol70hl {
+  float: right;
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px;
+  width: 68%; }
+
+.reveal .redBox {
+  background-color: rgba(116,2,15,0.2);
+  padding: 0px 10px 10px; }
+/* Some additinal stuff */
+
+/* Center by default.
+ * Right padding is to make space for the rotated license text
+ * (if present). */
+.reveal .imgcontainer, .reveal figure, .reveal div.figure, .reveal svg {
+  position: relative;
+  padding-right: 4vw;
+  text-align: center; }
+
+.reveal .imgcontainer figure, .reveal .imgcontainer div.figure {
+  margin: 3px 5px;
+  display: inline-block; }
+
+.reveal div.figure img {
+  float: none; }
+
+/* No figure and table numbers. */
+.reveal .figure-number, .reveal .table-number {
+  display: none; }
+
+/* Adjust background color for slide number.
+ * Use color of TOC footer (hard-coded in reveal-config.el). */
+.reveal .slide-number {
+  background-color: rgba(120,138,130,0.2); }
+
+/* Right in lists. */
+.reveal li > figure,
+.reveal li > div.figure {
+  float: right; }
+
+/* Org embeds img elements into p elements without text. */
+.reveal div.figure p {
+  margin: 0;
+  line-height: 1.0; }
+
+/* Org creates caption as sibling, I as second child. */
+.reveal div.figure + p, .reveal div.figure p:nth-child(2), .reveal figcaption {
+  margin: 0;
+  font-size: .5em;
+  line-height: 1.0;
+  color: rgba(34, 34, 34, 1); }
+
+/* Display license of image rotated, in smaller font.
+   Move to right, with same amount as padding-right above. */
+.reveal div.figure p:nth-child(3) {
+  font-size: .35em;
+  opacity: 0.66;
+  text-align: right;
+  margin: 5px;
+  position: absolute;
+  right: 4vw;
+  top: 0px;
+  -webkit-transform: rotate(-90deg);
+          transform: rotate(-90deg);
+  -webkit-transform-origin: top right;
+          transform-origin: top right; }
